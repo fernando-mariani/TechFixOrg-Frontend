@@ -1,6 +1,6 @@
-.technician-home { --home-green: #4ade80; --home-orange: #edaa76; --home-muted: #a9b4ac; min-height: 100dvh; padding: 32px max(24px, calc((100% - 1160px) / 2)); background: #151716; color: #ecefed; }
-.technician-home button, .technician-home input { font: inherit; }
-.technician-home :focus-visible { outline: 2px solid var(--home-green); outline-offset: 4px; }
+:is(.technician-home, .admin-page) { --home-green: #4ade80; --home-orange: #edaa76; --home-muted: #a9b4ac; min-height: 100dvh; padding: 32px max(24px, calc((100% - 1160px) / 2)); background: #151716; color: #ecefed; }
+:is(.technician-home, .admin-page) button, :is(.technician-home, .admin-page) input { font: inherit; }
+:is(.technician-home, .admin-page) :focus-visible { outline: 2px solid var(--home-green); outline-offset: 4px; }
 .home-header { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-bottom: 28px; border-bottom: 1px solid #303831; }
 .home-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: #ecefed; font-size: 24px; font-weight: 650; letter-spacing: -1px; text-decoration: none; }
 .home-brand-org { color: var(--home-green); }
@@ -54,5 +54,5 @@
 .home-skip:focus { transform: none; }
 @media (hover: hover) and (pointer: fine) { .home-clear:hover:not(:disabled), .home-expand:hover { background: #29322c; } }
 @media (max-width: 1000px) { .home-filters { grid-template-columns: 1fr 1fr; } .home-search { grid-column: 1 / -1; } .home-clear { grid-column: 1 / -1; justify-self: start; } .home-section-heading { align-items: start; flex-direction: column; } .home-order { grid-template-columns: 150px minmax(0, 1fr); } .home-order-deadline { grid-column: 2; align-items: start; } }
-@media (max-width: 600px) { .technician-home { padding: 24px 16px; } .home-header { align-items: start; flex-direction: column; gap: 12px; } .home-content { padding: 32px 0; } .home-welcome { margin-bottom: 32px; } .home-orders { padding: 24px 16px; border-top-right-radius: 32px; } .home-section-heading h2 { font-size: 20px; } .home-order { grid-template-columns: minmax(0, 1fr); gap: 16px; } .home-order-reference { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; } .home-order-deadline { grid-column: 1; } }
+@media (max-width: 600px) { :is(.technician-home, .admin-page) { padding: 24px 16px; } .home-header { align-items: start; flex-direction: column; gap: 12px; } .home-content { padding: 32px 0; } .home-welcome { margin-bottom: 32px; } .home-orders { padding: 24px 16px; border-top-right-radius: 32px; } .home-section-heading h2 { font-size: 20px; } .home-order { grid-template-columns: minmax(0, 1fr); gap: 16px; } .home-order-reference { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; } .home-order-deadline { grid-column: 1; } }
 @media (max-width: 380px) { .home-filters { grid-template-columns: minmax(0, 1fr); } }
