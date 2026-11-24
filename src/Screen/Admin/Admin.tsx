@@ -1,67 +1,67 @@
-import { useEffect, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
-import { Link } from 'react-router'
-import '../Tecnico/Home/Home.css'
-import './Admin.css'
+import { useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link } from 'react-router';
+import '../Tecnico/Home/Home.css';
+import './Admin.css';
 
-const perfis = ['Gerente', 'Técnico'] as const
-type Perfil = typeof perfis[number]
+const perfis = ['Gerente', 'Técnico'] as const;
+type Perfil = typeof perfis[number];
 type Usuario = {
-  id: number
-  nome: string
-  email: string
-  perfil: Perfil | null
-}
+  id: number;
+  nome: string;
+  email: string;
+  perfil: Perfil | null;
+};
 
 const usuariosExemplo: Usuario[] = [
   { id: 1, nome: 'Mariana Costa', email: 'mariana.costa@example.com', perfil: null },
   { id: 2, nome: 'Rafael Lima', email: 'rafael.lima@example.com', perfil: null },
   { id: 3, nome: 'Camila Santos', email: 'camila.santos@example.com', perfil: 'Gerente' },
   { id: 4, nome: 'Lucas Oliveira', email: 'lucas.oliveira@example.com', perfil: 'Técnico' },
-]
+];
 
 export default function Admin() {
-  const [usuarios, setUsuarios] = useState(usuariosExemplo)
-  const [usuarioEmEdicao, setUsuarioEmEdicao] = useState<number | null>(null)
-  const [confirmacao, setConfirmacao] = useState<{ usuario: Usuario; perfil: Perfil } | null>(null)
-  const [mensagem, setMensagem] = useState('')
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const tituloRef = useRef<HTMLHeadingElement>(null)
-  const selecaoRef = useRef<HTMLSelectElement>(null)
+  const [usuarios, setUsuarios] = useState(usuariosExemplo);
+  const [usuarioEmEdicao, setUsuarioEmEdicao] = useState<number | null>(null);
+  const [confirmacao, setConfirmacao] = useState<{ usuario: Usuario; perfil: Perfil; } | null>(null);
+  const [mensagem, setMensagem] = useState('');
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const tituloRef = useRef<HTMLHeadingElement>(null);
+  const selecaoRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
-    const tituloAnterior = document.title
-    document.title = 'Administração | TechFixOrg'
-    return () => { document.title = tituloAnterior }
-  }, [])
+    const tituloAnterior = document.title;
+    document.title = 'Administração | TechFixOrg';
+    return () => { document.title = tituloAnterior; };
+  }, []);
 
   useEffect(() => {
-    if (usuarioEmEdicao !== null) selecaoRef.current?.focus()
-  }, [usuarioEmEdicao])
+    if (usuarioEmEdicao !== null) selecaoRef.current?.focus();
+  }, [usuarioEmEdicao]);
 
   useEffect(() => {
-    if (confirmacao) dialogRef.current?.showModal()
-  }, [confirmacao])
+    if (confirmacao) dialogRef.current?.showModal();
+  }, [confirmacao]);
 
-  const ordenados = [...usuarios].sort((a, b) => Number(!!a.perfil) - Number(!!b.perfil))
+  const ordenados = [...usuarios].sort((a, b) => Number(!!a.perfil) - Number(!!b.perfil));
 
   function revisarVerificacao(event: FormEvent<HTMLFormElement>, usuario: Usuario) {
-    event.preventDefault()
-    const valor = new FormData(event.currentTarget).get('perfil')
-    const perfil = perfis.find((opcao) => opcao === valor)
-    if (!perfil) return
+    event.preventDefault();
+    const valor = new FormData(event.currentTarget).get('perfil');
+    const perfil = perfis.find((opcao) => opcao === valor);
+    if (!perfil) return;
 
-    setConfirmacao({ usuario, perfil })
+    setConfirmacao({ usuario, perfil });
   }
 
   function verificarUsuario() {
-    if (!confirmacao) return
-    const { usuario, perfil } = confirmacao
-    dialogRef.current?.close()
-    setUsuarios((atuais) => atuais.map((item) => item.id === usuario.id ? { ...item, perfil } : item))
-    setUsuarioEmEdicao(null)
-    setMensagem(`${usuario.nome} foi verificado com o perfil de ${perfil}.`)
-    tituloRef.current?.focus()
+    if (!confirmacao) return;
+    const { usuario, perfil } = confirmacao;
+    dialogRef.current?.close();
+    setUsuarios((atuais) => atuais.map((item) => item.id === usuario.id ? { ...item, perfil } : item));
+    setUsuarioEmEdicao(null);
+    setMensagem(`${usuario.nome} foi verificado com o perfil de ${perfil}.`);
+    tituloRef.current?.focus();
   }
 
   return (
@@ -151,5 +151,5 @@ export default function Admin() {
         </div>
       </dialog>
     </div>
-  )
+  );
 }

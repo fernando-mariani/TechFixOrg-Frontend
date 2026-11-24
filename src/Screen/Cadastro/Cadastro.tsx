@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
-import { Link } from 'react-router'
-import '../Login/Login.css'
-import './Cadastro.css'
+import { useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link } from 'react-router';
+import { useAuth } from '../../context/useAuth';
+import '../Login/Login.css';
+import './Cadastro.css';
 
 function PasswordField({ id, label, placeholder, describedBy, invalid, onChange }: {
-  id: string; label: string; placeholder: string; describedBy?: string; invalid?: boolean; onChange: () => void
+  id: string; label: string; placeholder: string; describedBy?: string; invalid?: boolean; onChange: () => void;
 }) {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(false);
   return <div className="form-field">
     <label htmlFor={id}>{label}</label>
     <div className="password-field">
@@ -20,34 +21,48 @@ function PasswordField({ id, label, placeholder, describedBy, invalid, onChange 
         </svg>
       </button>
     </div>
-  </div>
+  </div>;
 }
 
 export default function Cadastro() {
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
-  const formRef = useRef<HTMLFormElement>(null)
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const { cadastrar } = useAuth();
+  const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    const previousTitle = document.title
-    document.title = 'Cadastro | TechFixOrg'
-    return () => { document.title = previousTitle }
-  }, [])
-  function clearFeedback() { setError(''); setMessage('') }
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const data = new FormData(event.currentTarget)
-    if (!String(data.get('name') ?? '').trim()) {
-      setError('Informe seu nome completo.')
-      formRef.current?.querySelector<HTMLInputElement>('#name')?.focus()
-      return
+    const previousTitle = document.title;
+    document.title = 'Cadastro | TechFixOrg';
+    return () => { document.title = previousTitle; };
+  }, []);
+  function clearFeedback() { setError(''); setMessage(''); }
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (enviando) return;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const nome = String(data.get('name') ?? '').trim();
+    if (!nome) {
+      setError('Informe seu nome completo.');
+      formRef.current?.querySelector<HTMLInputElement>('#name')?.focus();
+      return;
     }
     if (data.get('password') !== data.get('confirmation')) {
-      setError('As senhas não coincidem. Confira a confirmação.')
-      formRef.current?.querySelector<HTMLInputElement>('#confirmation')?.focus()
-      return
+      setError('As senhas não coincidem. Confira a confirmação.');
+      formRef.current?.querySelector<HTMLInputElement>('#confirmation')?.focus();
+      return;
     }
-    setError('')
-    setMessage('O cadastro estará disponível após a integração com o sistema de autenticação. Nenhuma conta foi criada.')
+    clearFeedback();
+    setEnviando(true);
+    try {
+      await cadastrar({ nome, email: String(data.get('email')).trim(), senha: String(data.get('password')) });
+      form.reset();
+      setMessage('Cadastro realizado. Aguarde a verificação da sua conta pela administração.');
+    } catch (erro) {
+      setError(erro instanceof Error ? erro.message : 'Não foi possível realizar o cadastro.');
+    } finally {
+      setEnviando(false);
+    }
   }
   return (
     <main className="login-page register-page">
@@ -93,7 +108,7 @@ export default function Cadastro() {
         <form ref={formRef} onSubmit={handleSubmit} aria-labelledby="register-title">
           <div className="form-field">
             <label htmlFor="name">Nome completo</label>
-            <input id="name" name="name" type="text" autoComplete="name" placeholder="Como você se chama?" required maxLength={120} onChange={clearFeedback} aria-describedby={error && error.startsWith('Informe') ? 'register-error' : undefined} aria-invalid={error.startsWith('Informe') || undefined} />
+            <input id="name" name="name" type="text" autoComplete="name" placeholder="Como você se chama?" required maxLength={100} onChange={clearFeedback} aria-describedby={error && error.startsWith('Informe') ? 'register-error' : undefined} aria-invalid={error.startsWith('Informe') || undefined} />
           </div>
           <div className="form-field">
             <label htmlFor="register-email">E-mail de acesso</label>
@@ -103,7 +118,7 @@ export default function Cadastro() {
           <p className="password-hint" id="password-hint">Use pelo menos 8 caracteres.</p>
           <PasswordField id="confirmation" label="Confirmar senha" placeholder="Digite a senha novamente" invalid={error.startsWith('As senhas')} describedBy={error.startsWith('As senhas') ? 'register-error' : undefined} onChange={clearFeedback} />
           {error && <p className="register-error" id="register-error" role="alert">{error}</p>}
-          <button className="login-submit" type="submit">Criar minha conta <span aria-hidden="true">→</span></button>
+          <button className="login-submit" type="submit" disabled={enviando}>{enviando ? 'Cadastrando…' : 'Criar minha conta'} <span aria-hidden="true">→</span></button>
           {message && <p className="login-message" role="status">{message}</p>}
         </form>
         <p className="signup-prompt">Já tem uma conta? <Link to="/login">Entre aqui</Link></p>
@@ -112,5 +127,5 @@ export default function Cadastro() {
       </div>
       <footer className="login-footer">TechFixOrg <span aria-hidden="true">·</span> Assistência técnica para quem precisa voltar a se conectar.</footer>
     </main>
-  )
+  );
 }

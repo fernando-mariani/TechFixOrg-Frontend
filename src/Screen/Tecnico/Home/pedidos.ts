@@ -1,11 +1,11 @@
 export type Pedido = {
-  id: string
-  nome: string
-  cliente: string
-  descricao: string
-  dataLimite: string
-  status: 'Aguardando diagnóstico' | 'Em reparo' | 'Aguardando peça' | 'Concluído'
-}
+  id: string;
+  nome: string;
+  cliente: string;
+  descricao: string;
+  dataLimite: string;
+  status: 'Aguardando diagnóstico' | 'Em reparo' | 'Aguardando peça' | 'Concluído';
+};
 
 // Dados de demonstração. A conta e os pedidos reais devem vir da API.
 export const pedidosExemplo: Pedido[] = [
@@ -15,4 +15,4 @@ export const pedidosExemplo: Pedido[] = [
   { id: 'OS-1045', nome: 'Motorola Edge 40', cliente: 'Lucas Santos', descricao: 'Substituição de bateria com baixa autonomia.', dataLimite: '2026-11-16', status: 'Aguardando peça' },
   { id: 'OS-1046', nome: 'PlayStation 5', cliente: 'Beatriz Lima', descricao: 'Saída HDMI sem sinal. Inspecionar conector e circuito.', dataLimite: '2026-11-17', status: 'Aguardando diagnóstico' },
   { id: 'OS-1047', nome: 'iPad 9ª geração', cliente: 'Rafael Oliveira', descricao: 'Tela de toque não responde em parte do painel.', dataLimite: '2026-11-18', status: 'Aguardando peça' },
-]
+];

@@ -1,37 +1,37 @@
-import { useEffect, useId, useState } from 'react'
-import { Link } from 'react-router'
-import { pedidosExemplo } from './pedidos'
-import type { Pedido } from './pedidos'
-import './Home.css'
+import { useEffect, useId, useState } from 'react';
+import { Link } from 'react-router';
+import { pedidosExemplo } from './pedidos';
+import type { Pedido } from './pedidos';
+import './Home.css';
 
-type HomeProps = { nomeTecnico?: string; pedidos?: Pedido[] }
-const dateFormatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR')
-const displayDate = (date: string) => dateFormatter.format(new Date(`${date}T12:00:00`))
+type HomeProps = { nomeTecnico?: string; pedidos?: Pedido[]; };
+const dateFormatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+const normalize = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+const displayDate = (date: string) => dateFormatter.format(new Date(`${date}T12:00:00`));
 
 export default function Home({ nomeTecnico = 'Alex', pedidos = pedidosExemplo }: HomeProps) {
-  const [pesquisa, setPesquisa] = useState('')
-  const [inicio, setInicio] = useState('')
-  const [fim, setFim] = useState('')
-  const [expandido, setExpandido] = useState(false)
-  const listId = useId()
-  const demonstration = pedidos === pedidosExemplo
+  const [pesquisa, setPesquisa] = useState('');
+  const [inicio, setInicio] = useState('');
+  const [fim, setFim] = useState('');
+  const [expandido, setExpandido] = useState(false);
+  const listId = useId();
+  const demonstration = pedidos === pedidosExemplo;
   useEffect(() => {
-    const title = document.title
-    document.title = 'Início do técnico | TechFixOrg'
-    return () => { document.title = title }
-  }, [])
-  const pendentes = pedidos.filter((pedido) => pedido.status !== 'Concluído')
-  const intervaloInvalido = !!(inicio && fim && inicio > fim)
-  const termo = normalize(pesquisa.trim())
+    const title = document.title;
+    document.title = 'Início do técnico | TechFixOrg';
+    return () => { document.title = title; };
+  }, []);
+  const pendentes = pedidos.filter((pedido) => pedido.status !== 'Concluído');
+  const intervaloInvalido = !!(inicio && fim && inicio > fim);
+  const termo = normalize(pesquisa.trim());
   const filtrados = intervaloInvalido ? [] : pendentes.filter((pedido) =>
     normalize(`${pedido.nome} ${pedido.cliente} ${pedido.descricao} ${pedido.id}`).includes(termo)
     && (!inicio || pedido.dataLimite >= inicio)
     && (!fim || pedido.dataLimite <= fim)
-  ).sort((a, b) => a.dataLimite.localeCompare(b.dataLimite) || a.id.localeCompare(b.id))
-  const visiveis = expandido ? filtrados : filtrados.slice(0, 3)
-  const temFiltros = !!(pesquisa || inicio || fim)
-  function limparFiltros() { setPesquisa(''); setInicio(''); setFim(''); setExpandido(false) }
+  ).sort((a, b) => a.dataLimite.localeCompare(b.dataLimite) || a.id.localeCompare(b.id));
+  const visiveis = expandido ? filtrados : filtrados.slice(0, 3);
+  const temFiltros = !!(pesquisa || inicio || fim);
+  function limparFiltros() { setPesquisa(''); setInicio(''); setFim(''); setExpandido(false); }
 
   return <div className="technician-home">
     <a className="home-skip" href="#home-content">Ir para o conteúdo</a>
@@ -55,9 +55,9 @@ export default function Home({ nomeTecnico = 'Alex', pedidos = pedidosExemplo }:
           <p>Os prazos mais próximos aparecem primeiro.</p>
         </div>
         <form className="home-filters" role="search" aria-label="Filtrar pedidos pendentes" onSubmit={(event) => event.preventDefault()}>
-          <div className="home-filter home-search"><label htmlFor="order-search">Pesquisar pedido</label><input id="order-search" type="search" placeholder="Nome, cliente ou descrição" value={pesquisa} onChange={(event) => { setPesquisa(event.target.value); setExpandido(false) }} /></div>
-          <div className="home-filter"><label htmlFor="deadline-start">Data limite: de</label><input id="deadline-start" type="date" value={inicio} aria-invalid={intervaloInvalido} aria-describedby={intervaloInvalido ? 'date-error' : undefined} onChange={(event) => { setInicio(event.target.value); setExpandido(false) }} /></div>
-          <div className="home-filter"><label htmlFor="deadline-end">Até</label><input id="deadline-end" type="date" value={fim} aria-invalid={intervaloInvalido} aria-describedby={intervaloInvalido ? 'date-error' : undefined} onChange={(event) => { setFim(event.target.value); setExpandido(false) }} /></div>
+          <div className="home-filter home-search"><label htmlFor="order-search">Pesquisar pedido</label><input id="order-search" type="search" placeholder="Nome, cliente ou descrição" value={pesquisa} onChange={(event) => { setPesquisa(event.target.value); setExpandido(false); }} /></div>
+          <div className="home-filter"><label htmlFor="deadline-start">Data limite: de</label><input id="deadline-start" type="date" value={inicio} aria-invalid={intervaloInvalido} aria-describedby={intervaloInvalido ? 'date-error' : undefined} onChange={(event) => { setInicio(event.target.value); setExpandido(false); }} /></div>
+          <div className="home-filter"><label htmlFor="deadline-end">Até</label><input id="deadline-end" type="date" value={fim} aria-invalid={intervaloInvalido} aria-describedby={intervaloInvalido ? 'date-error' : undefined} onChange={(event) => { setFim(event.target.value); setExpandido(false); }} /></div>
           <button className="home-clear" type="button" onClick={limparFiltros} disabled={!temFiltros}>Limpar filtros</button>
         </form>
         {intervaloInvalido && <p className="home-date-error" id="date-error" role="alert">A data final deve ser igual ou posterior à data inicial.</p>}
@@ -74,5 +74,5 @@ export default function Home({ nomeTecnico = 'Alex', pedidos = pedidosExemplo }:
       </section>
     </main>
     <footer className="home-footer">TechFixOrg <span aria-hidden="true">·</span> Cada reparo, um novo começo.</footer>
-  </div>
+  </div>;
 }

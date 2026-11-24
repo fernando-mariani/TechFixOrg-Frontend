@@ -1,15 +1,39 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
-import { Link } from 'react-router'
-import './Login.css'
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { useAuth } from '../../context/useAuth';
+import './Login.css';
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [message, setMessage] = useState('')
+  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setMessage('O acesso à sua conta estará disponível após a integração com o sistema de autenticação.')
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (enviando) return;
+    const dados = new FormData(event.currentTarget);
+    setMessage('');
+    setError('');
+    setEnviando(true);
+
+    try {
+      const user = await login({
+        email: String(dados.get('email')).trim(),
+        senha: String(dados.get('password')),
+      }, dados.has('remember'));
+
+      if (user.role === 'ADMIN') navigate('/admin', { replace: true });
+      else if (user.role === 'TECNICO') navigate('/tecnico/home', { replace: true });
+      else setMessage(`Bem-vindo ao portal, ${user.nome}.`);
+    } catch (erro) {
+      setError(erro instanceof Error ? erro.message : 'Não foi possível entrar.');
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -72,7 +96,8 @@ export default function Login() {
             </div>
           </div>
           <label className="remember-me"><input type="checkbox" name="remember" /> Lembrar de mim</label>
-          <button className="login-submit" type="submit">Acessar portal da equipe <span aria-hidden="true">→</span></button>
+          <button className="login-submit" type="submit" disabled={enviando}>{enviando ? 'Entrando…' : 'Acessar portal da equipe'} <span aria-hidden="true">→</span></button>
+          {error && <p className="login-message" role="alert">{error}</p>}
           {message && <p className="login-message" role="status">{message}</p>}
         </form>
         <p className="signup-prompt">Não tem uma conta? <Link to="/cadastro">Crie aqui</Link></p>
@@ -81,6 +106,6 @@ export default function Login() {
       </div>
       <footer className="login-footer">TechFixOrg <span aria-hidden="true">·</span> Assistência técnica para quem precisa voltar a se conectar.</footer>
     </main>
-  )
+  );
 }
 

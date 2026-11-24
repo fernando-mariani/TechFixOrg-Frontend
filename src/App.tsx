@@ -1,13 +1,13 @@
-import './App.css'
+import './App.css';
 import {
   BrowserRouter,
   Routes,
   Route
 } from "react-router";
-import Login from './Screen/Login/Login'
-import Cadastro from './Screen/Cadastro/Cadastro'
-import Home from './Screen/Tecnico/Home/Home'
-import Admin from './Screen/Admin/Admin'
+import Login from './Screen/Login/Login';
+import Cadastro from './Screen/Cadastro/Cadastro';
+import Home from './Screen/Tecnico/Home/Home';
+import Admin from './Screen/Admin/Admin';
 
 function App() {
   return (
@@ -21,6 +21,6 @@ function App() {
         <Route path="/about" element={<h1>About</h1>} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
-export default App
+export default App;
