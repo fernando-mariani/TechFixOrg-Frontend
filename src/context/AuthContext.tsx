@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { PropsWithChildren } from 'react';
+import { apiUrl } from '../apiUrl';
 import type { AuthSession, CadastroData, LoginData } from '../types/AuthTypes';
 import { AuthContext } from './useAuth';
 
-const apiUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 const storageKey = 'techfixorg.token';
 
 function lerSessao(token: string): AuthSession {
