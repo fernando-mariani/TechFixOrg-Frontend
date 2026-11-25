@@ -21,6 +21,7 @@ export type ConsultaPedidos = {
   ordenarPreco: OrdemPreco | '';
   pagina: number;
   tamanho: number;
+  tecnicoId?: string;
 };
 
 export type PaginaPedidos = {

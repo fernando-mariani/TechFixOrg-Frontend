@@ -28,6 +28,7 @@ export default function Login() {
 
       if (user.role === 'ADMIN') navigate('/admin', { replace: true });
       else if (user.role === 'TECNICO') navigate('/tecnico/home', { replace: true });
+      else if (user.role === 'GERENTE') navigate('/gerente/home', { replace: true });
       else setMessage(`Bem-vindo ao portal, ${user.nome}.`);
     } catch (erro) {
       setError(erro instanceof Error ? erro.message : 'Não foi possível entrar.');
