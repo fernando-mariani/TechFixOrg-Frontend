@@ -1,17 +1,7 @@
-.register-page .login-layout { padding-block: 48px; }
-.register-card .form-field { margin-bottom: 18px; }
-.register-card .form-field input { font-size: 16px; }
-.register-card .password-toggle { top: 2px; right: 2px; width: 44px; height: 44px; }
-.register-card .password-hint { margin: -10px 0 18px; color: #a9b4ac; font-size: 12px; line-height: 1.6; }
-.register-card .register-error { margin: 0 0 18px; padding: 12px; border: 1px solid var(--login-orange); border-radius: 8px; color: var(--login-orange); font-size: 13px; line-height: 1.6; }
-.register-card input[aria-invalid='true'] { border-color: var(--login-orange); }
-.register-card input:focus { outline: 2px solid var(--login-green); outline-offset: 2px; }
-.register-card .signup-prompt a { display: inline-flex; align-items: center; min-height: 44px; }
-@media (max-width: 800px) {
- .register-page .login-layout { padding-block: 32px; }
- .register-page .login-story h2 { font-size: 40px; }
+.register-card .password-hint {
+  margin: -8px 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
 }
-@media (max-width: 380px) {
- .register-page .login-story h2 { font-size: 36px; }
- .register-card h2 { font-size: 30px; }
-}
+.register-card input[aria-invalid='true'] { border-color: var(--danger); }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Link } from 'react-router';
 import type { ConsultaPedidos, PaginaPedidos, Pedido, StatusPedido } from '../../types/PedidoTypes';
+import LoadingRows from '../../components/LoadingRows';
 import { categorias } from './categorias';
 import type { Categoria } from '../../types/TecnicoTypes';
 import '../Tecnico/Home/Home.css';
@@ -86,18 +87,17 @@ export function FilaPedidos({ listarPedidos, nome, gerente, estadoPerfil, filtro
     </header>
     <main id="home-content" className="home-content" tabIndex={-1}>
       <section className="home-welcome" aria-labelledby="home-title">
-        <p className="home-eyebrow">SUA BANCADA · VISÃO GERAL</p>
+        <p className="home-eyebrow">Assistência técnica</p>
         <h1 id="home-title">Boas-vindas{nome ? <>, <em>{nome}.</em></> : '.'}</h1>
         {estadoPerfil}
       </section>
-      <section className="home-orders" aria-labelledby="orders-title" aria-busy={carregando}>
+      <section className="home-orders" aria-labelledby="orders-title">
         <div className="home-section-heading">
           <div>
-            <p className="home-eyebrow">FILA DE TRABALHO</p>
             <h2 id="orders-title">{gerente ? 'Pedidos' : 'Meus pedidos'} {dados && <span className="home-count">{dados.page.totalElements}</span>}</h2>
           </div>
         </div>
-        <form className="home-filters" role="search" aria-label="Filtrar pedidos" onSubmit={aplicarFiltros} onReset={() => setConsulta(consultaInicial)}>
+        <form className={filtroTecnico ? 'home-filters home-filters--team' : 'home-filters'} role="search" aria-label="Filtrar pedidos" onSubmit={aplicarFiltros} onReset={() => setConsulta(consultaInicial)}>
           <div className="home-filter home-search">
             <label htmlFor="order-search">Pesquisar pedido</label>
             <input id="order-search" type="search" name="busca" placeholder="Título ou descrição" />
@@ -129,7 +129,7 @@ export function FilaPedidos({ listarPedidos, nome, gerente, estadoPerfil, filtro
           </div>
         </form>
 
-        {carregando && <p className="home-results" role="status">Carregando pedidos…</p>}
+        {carregando && <LoadingRows label="Carregando pedidos…" />}
         {!carregando && !dados && (
           <div className="home-empty">
             <p role="alert">Não foi possível carregar os pedidos.</p>
@@ -138,27 +138,27 @@ export function FilaPedidos({ listarPedidos, nome, gerente, estadoPerfil, filtro
         )}
         {dados && <>
           {dados.content.length === 0 ? (
-            <div className="home-empty"><h3>Nenhum pedido encontrado</h3></div>
+            <div className="home-empty"><h3>Nenhum pedido encontrado</h3><p>Experimente ajustar a busca ou limpar os filtros.</p></div>
           ) : (
             <ul className="home-order-list">
               {dados.content.map((pedido) => (
                 <li key={pedido.id} className={gerente && pedido.status === 'PRONTO' ? 'home-order gerente-finalizado' : 'home-order'}>
-                  <div className="home-order-reference">
-                    <span>{categorias[pedido.categoria]}</span>
-                    <span className="home-order-status">
-                      {gerente && pedido.status === 'PRONTO'
-                        ? <><span aria-hidden="true">✓ </span>Finalizado</>
-                        : statusPedido[pedido.status]}
-                    </span>
-                  </div>
                   <div className="home-order-detail">
+                    <span className="home-order-category">{categorias[pedido.categoria]}</span>
                     <h3>{pedido.titulo}</h3>
                     <p className="home-client">{pedido.nomeCliente}</p>
                     <p>{pedido.descricao}</p>
                   </div>
-                  <div className="home-order-price">
-                    <span>Preço</span>
-                    <strong>{pedido.preco == null ? 'A definir' : moeda.format(pedido.preco)}</strong>
+                  <div className="home-order-meta">
+                    <span className="home-order-status" data-status={pedido.status}>
+                      {gerente && pedido.status === 'PRONTO'
+                        ? <><span aria-hidden="true">✓ </span>Finalizado</>
+                        : statusPedido[pedido.status]}
+                    </span>
+                    <div className="home-order-price">
+                      <span>Preço</span>
+                      <strong>{pedido.preco == null ? 'A definir' : moeda.format(pedido.preco)}</strong>
+                    </div>
                   </div>
                   {acaoPedido?.(pedido, () => irParaPagina(consulta.pagina))}
                 </li>
@@ -175,7 +175,7 @@ export function FilaPedidos({ listarPedidos, nome, gerente, estadoPerfil, filtro
         </>}
       </section>
     </main>
-    <footer className="home-footer">TechFixOrg <span aria-hidden="true">·</span> Cada reparo, um novo começo.</footer>
+    <footer className="home-footer">TechFixOrg <span aria-hidden="true">·</span> Portal interno da equipe</footer>
   </div>;
 }
 

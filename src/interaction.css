@@ -1,0 +1,152 @@
+/* Shared interaction states for native controls and operational feedback. */
+:is(.form-field, .home-filter, .admin-search, .admin-role-form) :is(input, select):focus-visible {
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+:is(.form-field, .home-filter, .admin-search, .admin-role-form) :is(input, select):disabled {
+  background: #edf1ee;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+:is(.form-field, .home-filter, .admin-role-form) :is(input, select):is([aria-invalid="true"], :user-invalid) {
+  border-color: var(--danger);
+  outline-color: var(--danger);
+}
+
+:is(.home-search, .admin-search) input[type="search"] {
+  padding-inline-start: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2352655c' stroke-width='1.5'%3E%3Ccircle cx='8.5' cy='8.5' r='4.5'/%3E%3Cpath d='m12 12 4 4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  background-size: 19px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.form-field, .home-filter, .admin-search, .admin-role-form) :is(input, select):hover:not(:disabled, :focus, [aria-invalid="true"], :user-invalid) {
+    border-color: var(--primary);
+  }
+}
+
+.loading-rows {
+  display: grid;
+  gap: 12px;
+  margin-block: 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.loading-rows-preview,
+.loading-rows-preview > div {
+  display: grid;
+  gap: 10px;
+}
+
+.loading-rows-preview > div {
+  align-content: center;
+  min-height: 88px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.loading-rows-preview i {
+  display: block;
+  width: min(45%, 260px);
+  height: 10px;
+  border-radius: 4px;
+  background: var(--line);
+}
+
+.loading-rows-preview i + i { width: min(28%, 140px); }
+
+:is(p, small).inline-feedback:not(:empty) {
+  display: block;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--tint);
+  color: var(--primary-hover);
+}
+
+:is(p, small).inline-feedback[role="alert"] {
+  background: #fbeeea;
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(.login-submit, .home-clear, .admin-button, .password-toggle) {
+    transition: transform var(--motion-press) var(--ease-out);
+  }
+
+  :is(.login-submit, .home-clear, .admin-button, .password-toggle):active:not(:disabled) {
+    transform: scale(.97);
+  }
+
+  .login-story,
+  .login-card,
+  .home-welcome,
+  :is(.login-message, .register-error, .inline-feedback, .admin-feedback):not(:empty) {
+    opacity: 1;
+    transition: opacity var(--motion-panel) var(--ease-out);
+  }
+
+  @starting-style {
+    .login-story,
+    .login-card,
+    .home-welcome,
+    :is(.login-message, .register-error, .inline-feedback, .admin-feedback):not(:empty) { opacity: .45; }
+  }
+
+  :is(.admin-dialog, .gerente-dialogo) {
+    opacity: 0;
+    transform: scale(.97);
+    transition:
+      opacity var(--motion-panel) var(--ease-out),
+      transform var(--motion-panel) var(--ease-out),
+      display var(--motion-panel) allow-discrete,
+      overlay var(--motion-panel) allow-discrete;
+  }
+
+  :is(.admin-dialog, .gerente-dialogo)[open] {
+    opacity: 1;
+    transform: none;
+  }
+
+  :is(.admin-dialog, .gerente-dialogo)::backdrop {
+    opacity: 0;
+    transition: opacity var(--motion-panel) var(--ease-out), display var(--motion-panel) allow-discrete, overlay var(--motion-panel) allow-discrete;
+  }
+
+  :is(.admin-dialog, .gerente-dialogo)[open]::backdrop { opacity: 1; }
+
+  @starting-style {
+    :is(.admin-dialog, .gerente-dialogo)[open] {
+      opacity: 0;
+      transform: scale(.97);
+    }
+
+    :is(.admin-dialog, .gerente-dialogo)[open]::backdrop { opacity: 0; }
+  }
+
+  :is(.sidebar-mobile, .gerente-seletor)::details-content {
+    opacity: 0;
+    transform: translateY(-4px);
+    transform-origin: top;
+    transition:
+      opacity var(--motion-feedback) var(--ease-out),
+      transform var(--motion-feedback) var(--ease-out),
+      content-visibility var(--motion-feedback) allow-discrete;
+  }
+
+  :is(.sidebar-mobile, .gerente-seletor)[open]::details-content {
+    opacity: 1;
+    transform: none;
+  }
+
+  .sidebar-mobile summary svg { transition: transform var(--motion-feedback) var(--ease-out); }
+}
+
+.sidebar-mobile[open] summary svg { transform: rotate(180deg); }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router';
+import LoadingRows from '../../components/LoadingRows';
 import { useAdmin } from '../../context/useAdmin';
 import type { PerfilAdmin, UsuarioAdmin } from '../../types/AdminTypes';
 import '../Tecnico/Home/Home.css';
@@ -83,7 +84,8 @@ export default function Admin() {
 
       <main id="admin-content" className="home-content" tabIndex={-1}>
         <section className="home-welcome" aria-labelledby="admin-title">
-          <h1 id="admin-title">Gerencie os <em>usuários.</em></h1>
+          <p className="home-eyebrow">Contas e permissões</p>
+          <h1 id="admin-title">Administração de usuários</h1>
           <p>Verifique as contas da equipe e atribua um perfil de acesso.</p>
         </section>
 
@@ -104,17 +106,18 @@ export default function Admin() {
           </form>
           <div className="admin-feedback" role="status">{mensagem}</div>
           {!temSessao && <p role="alert">Entre na sua conta para consultar os usuários.</p>}
-          {temSessao && !resultado && !erroBusca && <p role="status">Carregando usuários…</p>}
+          {temSessao && !resultado && !erroBusca && <LoadingRows label="Carregando usuários…" />}
           {erroBusca && (
             <div className="admin-feedback" role="alert">
               <p>Não foi possível carregar os usuários.</p>
               <button type="button" className="admin-button" onClick={recarregarUsuarios}>Tentar novamente</button>
             </div>
           )}
-          {resultado && usuarios.length === 0 && <p role="status">Nenhum usuário encontrado nesta página.</p>}
+          {resultado && usuarios.length === 0 && <div className="home-empty" role="status"><h3>Nenhum usuário encontrado</h3><p>Experimente buscar por outro nome ou e-mail.</p></div>}
           <ul className="admin-users">
             {ordenados.map((usuario) => (
               <li key={usuario.id} className="admin-user">
+                <span className="admin-avatar" aria-hidden="true">{usuario.nome.trim().split(/\s+/u).slice(0, 2).map((parte) => Array.from(parte)[0]).join('').toLocaleUpperCase('pt-BR')}</span>
                 <div className="admin-user-details">
                   <h3>{usuario.nome}</h3>
                   <p>{usuario.email}</p>
@@ -167,7 +170,11 @@ export default function Admin() {
         ref={dialogRef}
         aria-labelledby="verify-title"
         aria-describedby="verify-description"
-        onClose={() => setConfirmacao(null)}
+        onClose={async (event) => {
+          const animacoes = event.currentTarget.getAnimations();
+          await Promise.allSettled(animacoes.map((animacao) => animacao.finished));
+          setConfirmacao((atual) => atual === confirmacao ? null : atual);
+        }}
         onCancel={(event) => { if (salvando) event.preventDefault(); }}
       >
         <h2 id="verify-title">Confirmar verificação?</h2>

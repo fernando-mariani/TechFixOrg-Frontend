@@ -31,6 +31,14 @@ function Atribuicao({ pedido, fechar, concluir, tecnicos, erroLista, tentarNovam
     return () => { elemento?.close(); };
   }, []);
 
+  async function cancelar() {
+    const elemento = dialogo.current;
+    if (!elemento?.open || salvando) return;
+    elemento.close();
+    await Promise.allSettled(elemento.getAnimations().map((animacao) => animacao.finished));
+    fechar();
+  }
+
   async function confirmar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     if (salvando || !tecnicoSelecionado) return;
@@ -55,7 +63,7 @@ function Atribuicao({ pedido, fechar, concluir, tecnicos, erroLista, tentarNovam
   return (
     <dialog className="gerente-dialogo" ref={dialogo} aria-labelledby="atribuicao-titulo" onCancel={(evento) => {
       evento.preventDefault();
-      if (!salvando) fechar();
+      void cancelar();
     }}>
       <h2 id="atribuicao-titulo">Atribuir pedido</h2>
       <p>{pedido.titulo}</p>
@@ -87,9 +95,9 @@ function Atribuicao({ pedido, fechar, concluir, tecnicos, erroLista, tentarNovam
           <label htmlFor="atribuicao-preco">Preço (R$)</label>
           <input id="atribuicao-preco" name="preco" type="number" inputMode="decimal" min="0" step="0.01" defaultValue={pedido.preco ?? ''} disabled={salvando} required />
         </div>
-        {erro && <p role="alert">{erro}</p>}
+        {erro && <p className="inline-feedback" role="alert">{erro}</p>}
         <div className="gerente-acoes">
-          <button className="home-clear" type="button" disabled={salvando} onClick={fechar}>Cancelar</button>
+          <button className="home-clear" type="button" disabled={salvando} onClick={cancelar}>Cancelar</button>
           <button className="home-clear" type="submit" disabled={salvando || !tecnicoSelecionado}>{salvando ? 'Atribuindo…' : 'Confirmar atribuição'}</button>
         </div>
       </form>
@@ -125,13 +133,14 @@ function ReenviarEmail({ pedido }: { pedido: Pedido }) {
       aria-label={enviando ? undefined : `Reenviar email do pedido ${pedido.titulo}`}>
       {enviando ? 'Enviando…' : 'Reenviar email'}
     </button>
-    {feedback && <small role={feedback.erro ? 'alert' : 'status'}>{feedback.texto}</small>}
+    {feedback && <small className="inline-feedback" role={feedback.erro ? 'alert' : 'status'}>{feedback.texto}</small>}
   </div>;
 }
 
 export default function Gerente() {
   const { nome, listarPedidos, listarTecnicos } = useGerente();
-  const [selecao, setSelecao] = useState<{ pedido: Pedido; atualizar: () => void } | null>(null);
+  const abertura = useRef(0);
+  const [selecao, setSelecao] = useState<{ chave: number; pedido: Pedido; atualizar: () => void } | null>(null);
   const [mensagem, setMensagem] = useState('');
   const [tentativa, setTentativa] = useState(0);
   const [tecnicos, setTecnicos] = useState<TecnicoDisponivel[] | null>(null);
@@ -153,7 +162,7 @@ export default function Gerente() {
 
   return <>
     <FilaPedidos gerente nome={nome} listarPedidos={listarPedidos}
-      estadoPerfil={<p role="status">{mensagem}</p>}
+      estadoPerfil={<p className="inline-feedback" role="status">{mensagem}</p>}
       filtroTecnico={<div className="home-filter">
         <label htmlFor="order-technician">Técnico</label>
         <select id="order-technician" name="tecnicoId" disabled={!tecnicos?.length}>
@@ -173,11 +182,11 @@ export default function Gerente() {
         if (pedido.status === 'AGUARDANDO_CONFIRMACAO') return <ReenviarEmail pedido={pedido} />;
         if (pedido.status !== 'AGUARDANDO_VERIFICACAO') return null;
         return <button className="home-clear gerente-atribuir" type="button" aria-label={`Atribuir pedido ${pedido.titulo}`}
-          onClick={() => { setMensagem(''); setSelecao({ pedido, atualizar }); }}>Atribuir pedido</button>;
+          onClick={() => { setMensagem(''); setSelecao({ chave: ++abertura.current, pedido, atualizar }); }}>Atribuir pedido</button>;
       }}
     />
-    {selecao && <Atribuicao pedido={selecao.pedido} tecnicos={tecnicos} erroLista={erroLista}
-      tentarNovamente={tentarNovamente} fechar={() => setSelecao(null)} concluir={() => {
+    {selecao && <Atribuicao key={selecao.chave} pedido={selecao.pedido} tecnicos={tecnicos} erroLista={erroLista}
+      tentarNovamente={tentarNovamente} fechar={() => setSelecao((atual) => atual === selecao ? null : atual)} concluir={() => {
       setMensagem(`O pedido “${selecao.pedido.titulo}” foi atribuído.`);
       setSelecao(null);
       selecao.atualizar();

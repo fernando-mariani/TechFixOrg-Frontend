@@ -1,0 +1,51 @@
+{
+ "start": "2026-11-25T19:48:27.528Z",
+ "round": 0,
+ "idle": 0,
+ "errors": 1,
+ "status": "error",
+ "history": [
+  {
+   "at": "2026-11-25T19:51:41.587Z",
+   "mode": "manual",
+   "status": "error",
+   "fails": 0,
+   "round": 0,
+   "reused": false,
+   "stopHookActive": false
+  }
+ ],
+ "max": 3,
+ "marker": {
+  "page": "dist/index.html",
+  "url": null,
+  "root": "dist",
+  "kind": "software",
+  "category": "Portal de assistência técnica",
+  "primary": "Acessar portal",
+  "rounds": 3,
+  "start": "2026-11-25T19:48:27.528Z",
+  "by": "gate.mjs --start"
+ },
+ "manual": true,
+ "fp": "07ddcec42eddf9e7",
+ "page": "dist/index.html",
+ "found": {
+  "fails": [],
+  "warns": [],
+  "crashed": [
+   "the copy (the page showed no <main>, <section> or <h1> to lint)",
+   "consistency.mjs could not walk 1440, 390",
+   "check.mjs could not run (exit 2: no Chrome found (set CHROME_PATH))"
+  ],
+  "seconds": {
+   "consistency": 8,
+   "layout": 1
+  }
+ },
+ "open": [],
+ "waived": [],
+ "warnCount": 0,
+ "note": "the copy (the page showed no <main>, <section> or <h1> to lint); consistency.mjs could not walk 1440, 390; check.mjs could not run (exit 2: no Chrome found (set CHROME_PATH))",
+ "at": "2026-11-25T19:51:41.588Z"
+}

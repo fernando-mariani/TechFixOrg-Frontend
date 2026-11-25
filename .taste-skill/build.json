@@ -1,0 +1,11 @@
+{
+ "page": "dist/index.html",
+ "url": null,
+ "root": "dist",
+ "kind": "software",
+ "category": "Portal de assistência técnica",
+ "primary": "Acessar portal",
+ "rounds": 3,
+ "start": "2026-11-25T19:48:27.528Z",
+ "by": "gate.mjs --start"
+}
