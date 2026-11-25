@@ -1,29 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router';
+import { useAdmin } from '../../context/useAdmin';
+import type { PerfilAdmin, UsuarioAdmin } from '../../types/AdminTypes';
 import '../Tecnico/Home/Home.css';
 import './Admin.css';
 
-const perfis = ['Gerente', 'Técnico'] as const;
-type Perfil = typeof perfis[number];
-type Usuario = {
-  id: number;
-  nome: string;
-  email: string;
-  perfil: Perfil | null;
-};
+const perfis = { GERENTE: 'Gerente', TECNICO: 'Técnico' } satisfies Record<PerfilAdmin, string>;
 
-const usuariosExemplo: Usuario[] = [
-  { id: 1, nome: 'Mariana Costa', email: 'mariana.costa@example.com', perfil: null },
-  { id: 2, nome: 'Rafael Lima', email: 'rafael.lima@example.com', perfil: null },
-  { id: 3, nome: 'Camila Santos', email: 'camila.santos@example.com', perfil: 'Gerente' },
-  { id: 4, nome: 'Lucas Oliveira', email: 'lucas.oliveira@example.com', perfil: 'Técnico' },
-];
+function nomePerfil(role: string) {
+  return role === 'GERENTE' || role === 'TECNICO' ? perfis[role] : role;
+}
 
 export default function Admin() {
-  const [usuarios, setUsuarios] = useState(usuariosExemplo);
-  const [usuarioEmEdicao, setUsuarioEmEdicao] = useState<number | null>(null);
-  const [confirmacao, setConfirmacao] = useState<{ usuario: Usuario; perfil: Perfil; } | null>(null);
+  const {
+    temSessao, pagina, resultado, erroBusca, salvando, erroVerificacao,
+    buscarUsuarios, mudarPagina, recarregarUsuarios, limparErroVerificacao, verificarUsuario,
+  } = useAdmin();
+  const [usuarioEmEdicao, setUsuarioEmEdicao] = useState<string | null>(null);
+  const [confirmacao, setConfirmacao] = useState<{ usuario: UsuarioAdmin; perfil: PerfilAdmin; } | null>(null);
   const [mensagem, setMensagem] = useState('');
   const dialogRef = useRef<HTMLDialogElement>(null);
   const tituloRef = useRef<HTMLHeadingElement>(null);
@@ -43,24 +38,31 @@ export default function Admin() {
     if (confirmacao) dialogRef.current?.showModal();
   }, [confirmacao]);
 
-  const ordenados = [...usuarios].sort((a, b) => Number(!!a.perfil) - Number(!!b.perfil));
+  const usuarios = resultado?.usuarios ?? [];
+  const ordenados = [...usuarios].sort((a, b) => Number(a.verificado) - Number(b.verificado));
 
-  function revisarVerificacao(event: FormEvent<HTMLFormElement>, usuario: Usuario) {
-    event.preventDefault();
-    const valor = new FormData(event.currentTarget).get('perfil');
-    const perfil = perfis.find((opcao) => opcao === valor);
-    if (!perfil) return;
-
-    setConfirmacao({ usuario, perfil });
+  function limparSelecao() {
+    setUsuarioEmEdicao(null);
+    setMensagem('');
   }
 
-  function verificarUsuario() {
+  function revisarVerificacao(event: FormEvent<HTMLFormElement>, usuario: UsuarioAdmin) {
+    event.preventDefault();
+    const valor = new FormData(event.currentTarget).get('perfil');
+    if (valor !== 'GERENTE' && valor !== 'TECNICO') return;
+
+    limparErroVerificacao();
+    setConfirmacao({ usuario, perfil: valor });
+  }
+
+  async function confirmarVerificacao() {
     if (!confirmacao) return;
     const { usuario, perfil } = confirmacao;
-    dialogRef.current?.close();
-    setUsuarios((atuais) => atuais.map((item) => item.id === usuario.id ? { ...item, perfil } : item));
+    if (!await verificarUsuario(usuario.id, perfil)) return;
+
     setUsuarioEmEdicao(null);
-    setMensagem(`${usuario.nome} foi verificado com o perfil de ${perfil}.`);
+    setMensagem(`${usuario.nome} foi verificado com o perfil de ${perfis[perfil]}.`);
+    dialogRef.current?.close();
     tituloRef.current?.focus();
   }
 
@@ -83,26 +85,45 @@ export default function Admin() {
         <section className="home-welcome" aria-labelledby="admin-title">
           <h1 id="admin-title">Gerencie os <em>usuários.</em></h1>
           <p>Verifique as contas da equipe e atribua um perfil de acesso.</p>
-          <p className="home-demo">Prévia com usuários fictícios. As alterações duram até sair da tela.</p>
         </section>
 
         <section className="home-orders" aria-labelledby="users-title">
           <div className="home-section-heading">
-            <h2 id="users-title" ref={tituloRef} tabIndex={-1}>Usuários <span className="home-count">{usuarios.length}</span></h2>
-            <p>As contas não verificadas aparecem primeiro.</p>
+            <h2 id="users-title" ref={tituloRef} tabIndex={-1}>Usuários {resultado && <span className="home-count">{resultado.totalUsuarios}</span>}</h2>
+            <p>As contas não verificadas aparecem primeiro em cada página.</p>
           </div>
+          <form className="admin-search" role="search" onSubmit={(event) => {
+            event.preventDefault();
+            const busca = String(new FormData(event.currentTarget).get('busca') ?? '');
+            limparSelecao();
+            buscarUsuarios(busca);
+          }}>
+            <label htmlFor="admin-busca">Buscar usuários</label>
+            <input id="admin-busca" name="busca" type="search" placeholder="Nome ou e-mail" />
+            <button type="submit" className="admin-button" disabled={!temSessao}>Buscar</button>
+          </form>
           <div className="admin-feedback" role="status">{mensagem}</div>
+          {!temSessao && <p role="alert">Entre na sua conta para consultar os usuários.</p>}
+          {temSessao && !resultado && !erroBusca && <p role="status">Carregando usuários…</p>}
+          {erroBusca && (
+            <div className="admin-feedback" role="alert">
+              <p>Não foi possível carregar os usuários.</p>
+              <button type="button" className="admin-button" onClick={recarregarUsuarios}>Tentar novamente</button>
+            </div>
+          )}
+          {resultado && usuarios.length === 0 && <p role="status">Nenhum usuário encontrado nesta página.</p>}
           <ul className="admin-users">
             {ordenados.map((usuario) => (
               <li key={usuario.id} className="admin-user">
                 <div className="admin-user-details">
                   <h3>{usuario.nome}</h3>
                   <p>{usuario.email}</p>
-                  <span className={usuario.perfil ? 'admin-status is-verified' : 'admin-status'}>
-                    {usuario.perfil ? `Verificado · ${usuario.perfil}` : 'Não verificado'}
+                  <span className={usuario.verificado ? 'admin-status is-verified' : 'admin-status'}>
+                    {usuario.verificado ? 'Verificado' : 'Não verificado'}
+                    {usuario.role && ` · ${nomePerfil(usuario.role)}`}
                   </span>
                 </div>
-                {!usuario.perfil && (
+                {!usuario.verificado && (
                   <div className="admin-user-action">
                     <button
                       type="button"
@@ -120,7 +141,7 @@ export default function Admin() {
                           <label htmlFor={`perfil-${usuario.id}`}>Perfil de acesso</label>
                           <select id={`perfil-${usuario.id}`} name="perfil" defaultValue="" ref={selecaoRef} required>
                             <option value="" disabled>Selecione um perfil</option>
-                            {perfis.map((perfil) => <option key={perfil} value={perfil}>{perfil}</option>)}
+                            {Object.entries(perfis).map(([perfil, nome]) => <option key={perfil} value={perfil}>{nome}</option>)}
                           </select>
                           <button type="submit" className="admin-button">Continuar</button>
                         </form>
@@ -131,6 +152,13 @@ export default function Admin() {
               </li>
             ))}
           </ul>
+          {resultado && (pagina > 0 || resultado.temProxima) && (
+            <nav className="admin-pagination" aria-label="Paginação de usuários">
+              <button type="button" className="admin-button" disabled={pagina === 0} onClick={() => { limparSelecao(); mudarPagina(pagina - 1); }}>Anterior</button>
+              <span>Página {pagina + 1}{resultado.totalPaginas ? ` de ${resultado.totalPaginas}` : ''}</span>
+              <button type="button" className="admin-button" disabled={!resultado.temProxima} onClick={() => { limparSelecao(); mudarPagina(pagina + 1); }}>Próxima</button>
+            </nav>
+          )}
         </section>
       </main>
 
@@ -140,14 +168,16 @@ export default function Admin() {
         aria-labelledby="verify-title"
         aria-describedby="verify-description"
         onClose={() => setConfirmacao(null)}
+        onCancel={(event) => { if (salvando) event.preventDefault(); }}
       >
         <h2 id="verify-title">Confirmar verificação?</h2>
         <p id="verify-description">
-          Deseja verificar <strong>{confirmacao?.usuario.nome}</strong> e atribuir o perfil de <strong>{confirmacao?.perfil}</strong>?
+          Deseja verificar <strong>{confirmacao?.usuario.nome}</strong> e atribuir o perfil de <strong>{confirmacao && perfis[confirmacao.perfil]}</strong>?
         </p>
+        {erroVerificacao && <p role="alert">{erroVerificacao}</p>}
         <div className="admin-dialog-actions">
-          <button type="button" className="admin-button admin-button-secondary" onClick={() => dialogRef.current?.close()}>Cancelar</button>
-          <button type="button" className="admin-button" onClick={verificarUsuario}>Confirmar verificação</button>
+          <button type="button" className="admin-button admin-button-secondary" disabled={salvando} onClick={() => dialogRef.current?.close()}>Cancelar</button>
+          <button type="button" className="admin-button" disabled={salvando} onClick={confirmarVerificacao}>{salvando ? 'Verificando…' : 'Confirmar verificação'}</button>
         </div>
       </dialog>
     </div>

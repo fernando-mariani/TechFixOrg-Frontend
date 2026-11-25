@@ -1,3 +1,37 @@
+.admin-search,
+.admin-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-search {
+  margin-bottom: 16px;
+}
+
+.admin-search input {
+  flex: 1 1 180px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #556359;
+  border-radius: 8px;
+  background: #202421;
+  color: inherit;
+  font: inherit;
+}
+
+.admin-pagination {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.admin-page .admin-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .admin-users {
   display: grid;
   gap: 12px;
